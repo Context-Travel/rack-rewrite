@@ -138,14 +138,19 @@ module Rack
         status = @options[:status] || 200
         case self.rule_type
         when :r301
+          Rails.logger.info("[301] Redirecting from #{self.from.inspect} to #{interpreted_to}")
           [301, {'Location' => interpreted_to, 'Content-Type' => Rack::Mime.mime_type(::File.extname(interpreted_to))}.merge!(additional_headers), [redirect_message(interpreted_to)]]
         when :r302
+          Rails.logger.info("[302] Redirecting from #{self.from.inspect} to #{interpreted_to}")
           [302, {'Location' => interpreted_to, 'Content-Type' => Rack::Mime.mime_type(::File.extname(interpreted_to))}.merge!(additional_headers), [redirect_message(interpreted_to)]]
         when :r303
+          Rails.logger.info("[303] Redirecting from #{self.from.inspect} to #{interpreted_to}")
           [303, {'Location' => interpreted_to, 'Content-Type' => Rack::Mime.mime_type(::File.extname(interpreted_to))}.merge!(additional_headers), [redirect_message(interpreted_to)]]
         when :r307
+          Rails.logger.info("[307] Redirecting from #{self.from.inspect} to #{interpreted_to}")
           [307, {'Location' => interpreted_to, 'Content-Type' => Rack::Mime.mime_type(::File.extname(interpreted_to))}.merge!(additional_headers), [redirect_message(interpreted_to)]]
         when :rewrite
+          Rails.logger.info("[200] Rewriting from #{self.from.inspect} to #{interpreted_to}")
           # return [200, {}, {:content => env.inspect}]
           env['REQUEST_URI'] = interpreted_to
           if q_index = interpreted_to.index('?')
@@ -157,17 +162,20 @@ module Rack
           end
           true
         when :send_file
+          Rails.logger.info("[200] Send File from #{self.from.inspect} to #{interpreted_to}")
           [status, {
             'Content-Length' => ::File.size(interpreted_to).to_s,
             'Content-Type'   => Rack::Mime.mime_type(::File.extname(interpreted_to))
             }.merge!(additional_headers), [::File.read(interpreted_to)]]
         when :x_send_file
+          Rails.logger.info("[200] X-Sendfile from #{self.from.inspect} to #{interpreted_to}")
           [status, {
             'X-Sendfile'     => interpreted_to,
             'Content-Length' => ::File.size(interpreted_to).to_s,
             'Content-Type'   => Rack::Mime.mime_type(::File.extname(interpreted_to))
             }.merge!(additional_headers), []]
         when :send_data
+          Rails.logger.info("[200] Send Data from #{self.from.inspect} to #{interpreted_to}")
           [status, {
             'Content-Length' => interpreted_to.bytesize,
             'Content-Type' => 'text/html',
@@ -205,6 +213,7 @@ module Rack
         end
 
       private
+
         def normalize_options(arg)
           options = arg.respond_to?(:call) ? {:if => arg} : arg
           options.symbolize_keys! if options.respond_to? :symbolize_keys!
